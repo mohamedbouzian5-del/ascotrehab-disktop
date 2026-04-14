@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 
-/* ─────────────────────────────────────────────────────
-   DESIGN TOKENS — matches ascotrehab.com website exactly
-   Font: Outfit | Primary: #612141 | Secondary: #83786F
-───────────────────────────────────────────────────── */
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -43,7 +39,6 @@ const css = `
   .sec-in { animation: fadeIn 0.35s ease; }
   .stat-in { animation: statUp 0.5s ease both; }
 
-  /* Eyebrow — matches website .eyebrow component */
   .eyebrow {
     display: inline-flex; align-items: center; gap: 12px;
     font-size: 10px; font-weight: 700; letter-spacing: .22em;
@@ -56,14 +51,12 @@ const css = `
   .eyebrow.lt { color: rgba(255,255,255,.75); }
   .eyebrow.lt::before { background: rgba(255,255,255,.35); }
 
-  /* Section heading — matches website .sh */
   .sh {
     font-size: clamp(24px,3.2vw,38px);
     font-weight: 700; letter-spacing: -.03em; line-height: 1.1;
     color: var(--pd);
   }
 
-  /* Cards */
   .card {
     background: var(--white);
     border: 1.5px solid var(--bd);
@@ -79,7 +72,6 @@ const css = `
     transform: translateY(-3px);
   }
 
-  /* Review card */
   .r-card {
     background: var(--white);
     border: 1.5px solid var(--bd);
@@ -87,14 +79,12 @@ const css = `
     padding: 22px;
   }
 
-  /* Tag pill */
   .tag-pill {
     display: inline-block; padding: 3px 10px; border-radius: 100px;
     font-size: 10px; font-weight: 600; letter-spacing: .15em;
     text-transform: uppercase;
   }
 
-  /* Nav buttons */
   .nav-btn {
     transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
     border-radius: 100px;
@@ -110,12 +100,10 @@ const css = `
   .scroll::-webkit-scrollbar { width:3px; }
   .scroll::-webkit-scrollbar-thumb { background:rgba(97,33,65,0.2); border-radius:2px; }
 
-  /* Marquee ticker */
   .marquee-track { display:flex; animation: marquee 28s linear infinite; }
   .marquee-track:hover { animation-play-state: paused; }
 `;
 
-/* ─── DATA (from website) ─── */
 const heroSlides = [
   { eye:"South West London", h:"Recovery\nThrough\nExcellence.", b:"A specialist neurorehabilitation centre delivering expert care with compassion and precision." },
   { eye:"Innovation in Care",  h:"The Future\nof Neuro\nRehab.",      b:"Home to Fourier Intelligence's RehabHub — robotics-assisted recovery for life-changing results." },
@@ -143,7 +131,6 @@ const conditions = [
   { g:"V",   acc:"#6b4a1a", title:"Multiple Sclerosis",      desc:"Ongoing rehabilitation to manage MS symptoms and preserve function through patient-centred care." },
   { g:"VI",  acc:"#83786F", title:"Guillain-Barré Syndrome", desc:"Carefully paced rehabilitation rebuilding strength, coordination, and function during recovery from GBS." },
 ];
-// Real Google Reviews from the website
 const reviews = [
   { stars:5, text:"I had both physiotherapy and hydrotherapy at Ascot Rehab and couldn't be happier. The staff are amazing — friendly, caring, and incredibly knowledgeable. The hospital is brand new and all of their technology is state-of-the-art and very impressive.", author:"Jihan Natour", source:"Google Review · Verified" },
   { stars:5, text:"We can't speak highly enough of Ascot Rehab. Everyone — from physical and occupational therapy to the front desk — has been compassionate, supportive, and genuinely caring. We've seen a massive improvement in her walking stability.", author:"Ray Joseph", source:"Google Review · Verified" },
@@ -171,7 +158,6 @@ const feedbackConfig = {
   endpoint: "",
 };
 
-/* ─── SUB-COMPONENTS ─── */
 function Clock() {
   const [t, sT] = useState(new Date());
   useEffect(() => { const id = setInterval(() => sT(new Date()), 1000); return () => clearInterval(id); }, []);
@@ -205,7 +191,6 @@ function SHdr({ eye, title, light }) {
   );
 }
 
-/* ─── MAIN ─── */
 export default function App() {
   const [sec, setSec]   = useState("home");
   const [idx, setIdx]   = useState(0);
@@ -233,7 +218,12 @@ export default function App() {
     bump();
     window.addEventListener("click", bump);
     window.addEventListener("touchstart", bump);
-    return () => { window.removeEventListener("click", bump); window.removeEventListener("touchstart", bump); clearTimeout(idle.current); };
+    return () => {
+      window.removeEventListener("click", bump);
+      window.removeEventListener("touchstart", bump);
+      clearTimeout(idle.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (sec !== "home") return;
@@ -248,34 +238,24 @@ export default function App() {
     e.preventDefault();
     setErr("");
     setSent(false);
-    if (!form.consent) {
-      setErr("Please confirm consent before submitting.");
-      return;
-    }
+    if (!form.consent) { setErr("Please confirm consent before submitting."); return; }
     setSubmitting(true);
     try {
-      const payload = {
-        ...form,
-        submittedAt: new Date().toISOString(),
-        source: "front-display",
-      };
+      const payload = { ...form, submittedAt: new Date().toISOString(), source: "front-display" };
       const existing = JSON.parse(localStorage.getItem("ascotPrivateFeedback") || "[]");
       localStorage.setItem("ascotPrivateFeedback", JSON.stringify([payload, ...existing].slice(0, 1000)));
       if (feedbackConfig.endpoint) {
-        await fetch(feedbackConfig.endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        await fetch(feedbackConfig.endpoint, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
       }
       setSent(true);
-      setForm({ overall: "5", communication: "5", facility: "5", waitTime: "5", comment: "", consent: false });
-    } catch (error) {
+      setForm({ overall:"5", communication:"5", facility:"5", waitTime:"5", comment:"", consent:false });
+    } catch {
       setErr("Unable to submit right now. Please scan the QR code to send feedback on your phone.");
     } finally {
       setSubmitting(false);
     }
   };
+
   const nav = [
     { id:"home",       label:"Home",       sym:"⊹" },
     { id:"services",   label:"Services",   sym:"⊕" },
@@ -290,16 +270,13 @@ export default function App() {
       <style>{css}</style>
       <div style={{ fontFamily:"var(--font)", background:"var(--ws)", width:"100vw", height:"100vh", display:"flex", flexDirection:"column", overflow:"hidden", color:"var(--tx)" }}>
 
-        {/* Subtle background orbs */}
         <div style={{ position:"fixed", inset:0, pointerEvents:"none", overflow:"hidden", zIndex:0 }}>
           <div className="orb-a" style={{ position:"absolute", top:"-20%", right:"-8%", width:"45vw", height:"45vw", borderRadius:"50%", background:"radial-gradient(circle,rgba(97,33,65,0.06) 0%,transparent 70%)" }}/>
           <div className="orb-b" style={{ position:"absolute", bottom:"-15%", left:"-6%", width:"38vw", height:"38vw", borderRadius:"50%", background:"radial-gradient(circle,rgba(131,120,111,0.07) 0%,transparent 70%)" }}/>
         </div>
 
-        {/* ── HEADER ── */}
         <header style={{ position:"relative", zIndex:10, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"13px 36px", borderBottom:"1.5px solid var(--bd)", background:"rgba(255,255,255,0.9)", backdropFilter:"blur(16px)", flexShrink:0 }}>
           <div style={{ display:"flex", alignItems:"center", gap:13 }}>
-            {/* Logo mark matching website */}
             <div style={{ width:36, height:36, borderRadius:"50%", background:"var(--plum)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16, fontWeight:800, color:"#fff", letterSpacing:-0.5 }}>A</div>
             <div>
               <div style={{ fontSize:17, fontWeight:700, letterSpacing:-.3, color:"var(--plum)" }}>Ascot Rehab</div>
@@ -307,29 +284,21 @@ export default function App() {
             </div>
           </div>
           <Clock />
-          {/* Accreditation badge — from website */}
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <div style={{ padding:"5px 14px", borderRadius:100, border:"1.5px solid var(--bd)", fontSize:10, fontWeight:600, color:"var(--warm)", letterSpacing:.15, textTransform:"uppercase" }}>Fourier Centre of Excellence</div>
             <div style={{ padding:"5px 14px", borderRadius:100, background:"var(--plum)", fontSize:10, fontWeight:600, color:"#fff", letterSpacing:.15, textTransform:"uppercase" }}>★★★★★ Rated</div>
           </div>
         </header>
 
-        {/* ── MAIN ── */}
         <main style={{ flex:1, overflow:"hidden", position:"relative", zIndex:5 }}>
 
-          {/* ── HOME ── */}
           {sec === "home" && (
             <div style={{ height:"100%", display:"flex", flexDirection:"column", background:"var(--pp)", position:"relative", overflow:"hidden" }} key={key}>
-              {/* Background texture */}
               <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse 70% 80% at -5% 55%,rgba(97,33,65,.6) 0%,transparent 60%),radial-gradient(ellipse 50% 50% at 105% 5%,rgba(131,120,111,.1) 0%,transparent 55%)", pointerEvents:"none" }}/>
-
-              {/* Hero content */}
               <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", padding:"40px 64px 20px", position:"relative", zIndex:2, maxWidth:760 }}>
                 <Eyebrow light>{sl.eye}</Eyebrow>
                 <h1 className="fade-up" style={{ fontFamily:"var(--font)", fontSize:"clamp(40px,6vw,80px)", fontWeight:800, lineHeight:1.0, letterSpacing:-2, whiteSpace:"pre-line", color:"#fff", marginBottom:18, marginTop:8 }}>{sl.h}</h1>
                 <p className="fade-up-2" style={{ fontSize:15, color:"rgba(255,255,255,0.6)", lineHeight:1.75, fontWeight:300, maxWidth:420 }}>{sl.b}</p>
-
-                {/* Slide dots */}
                 <div className="fade-up-3" style={{ display:"flex", gap:7, marginTop:28 }}>
                   {heroSlides.map((_,i) => (
                     <button key={i} onClick={() => { setIdx(i); setKey(k=>k+1); }}
@@ -337,8 +306,6 @@ export default function App() {
                   ))}
                 </div>
               </div>
-
-              {/* Stats bar — matches website stat row */}
               <div style={{ position:"relative", zIndex:2, display:"flex", borderTop:"1px solid rgba(255,255,255,0.1)", background:"rgba(0,0,0,0.2)", backdropFilter:"blur(8px)" }}>
                 {stats.map((s,i) => (
                   <div key={i} className="stat-in" style={{ flex:1, padding:"20px 28px", borderRight:i<stats.length-1?"1px solid rgba(255,255,255,0.1)":"none", animationDelay:`${i*0.07}s` }}>
@@ -347,8 +314,6 @@ export default function App() {
                   </div>
                 ))}
               </div>
-
-              {/* Marquee ticker — from website */}
               <div style={{ background:"var(--plum)", padding:"11px 0", overflow:"hidden", flexShrink:0, position:"relative", zIndex:2 }}>
                 <div className="marquee-track" style={{ gap:0 }}>
                   {[...marqueeTags,...marqueeTags].map((t,i) => (
@@ -367,7 +332,6 @@ export default function App() {
             </div>
           )}
 
-          {/* ── SERVICES ── */}
           {sec === "services" && (
             <div className="sec-in scroll" style={{ height:"100%", padding:"24px 36px" }}>
               <SHdr eye="What we offer" title="Our Services" />
@@ -390,7 +354,6 @@ export default function App() {
             </div>
           )}
 
-          {/* ── CONDITIONS ── */}
           {sec === "conditions" && (
             <div className="sec-in scroll" style={{ height:"100%", padding:"24px 36px" }}>
               <SHdr eye="We specialise in" title="Conditions We Treat" />
@@ -398,7 +361,6 @@ export default function App() {
                 {conditions.map((c,i) => (
                   <button key={i} className={`card ${card===i?"on":""}`} onClick={() => setCard(card===i?null:i)}
                     style={{ padding:"20px 22px", textAlign:"left", border:"none", display:"flex", gap:16, alignItems:"flex-start", width:"100%", color:"inherit" }}>
-                    {/* Accent dot */}
                     <div style={{ width:10, height:10, borderRadius:"50%", background:card===i?"rgba(255,255,255,0.5)":c.acc, flexShrink:0, marginTop:6, boxShadow:card===i?"none":`0 0 0 3px ${c.acc}22`, transition:"all 0.3s" }}/>
                     <div style={{ flex:1 }}>
                       <div style={{ fontSize:17, fontWeight:700, letterSpacing:-.3, color:card===i?"#fff":"var(--pd)", marginBottom:5, lineHeight:1.2 }}>{c.title}</div>
@@ -413,10 +375,8 @@ export default function App() {
             </div>
           )}
 
-          {/* ── REVIEWS — real Google reviews from website ── */}
           {sec === "reviews" && (
             <div className="sec-in scroll" style={{ height:"100%", padding:"24px 36px" }}>
-              {/* Rating banner — matches website */}
               <div style={{ background:"var(--plum)", borderRadius:16, padding:"20px 28px", display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:18 }}>
                 <div>
                   <Eyebrow light>Patient Voices</Eyebrow>
@@ -432,7 +392,7 @@ export default function App() {
                 {reviews.map((r,i) => (
                   <div key={i} className="r-card">
                     <Stars n={r.stars}/>
-                    <p style={{ fontSize:13.5, color:"var(--tm)", lineHeight:1.72, fontWeight:400, margin:"10px 0 14px", fontStyle:"italic" }}>"{r.text}"</p>
+                    <p style={{ fontSize:13.5, color:"var(--tm)", lineHeight:1.72, fontWeight:400, margin:"10px 0 14px", fontStyle:"italic" }}>&ldquo;{r.text}&rdquo;</p>
                     <div style={{ fontSize:12, fontWeight:600, color:"var(--pd)" }}>{r.author}</div>
                     <div style={{ fontSize:10, color:"var(--wl)", letterSpacing:.5, marginTop:2 }}>{r.source}</div>
                   </div>
@@ -441,7 +401,6 @@ export default function App() {
             </div>
           )}
 
-          {/* ── TEAM ── */}
           {sec === "team" && (
             <div className="sec-in scroll" style={{ height:"100%", padding:"24px 36px" }}>
               <SHdr eye="The people behind your care" title="Meet Our Team" />
@@ -461,6 +420,7 @@ export default function App() {
               </div>
             </div>
           )}
+
           {sec === "feedback" && (
             <div className="sec-in scroll" style={{ height:"100%", padding:"24px 36px" }}>
               <div style={{ display:"grid", gridTemplateColumns:"1.15fr 1fr", gap:14 }}>
@@ -496,7 +456,7 @@ export default function App() {
                       I consent to Ascot Rehab storing this response as private service feedback.
                     </label>
                     {err && <div style={{ fontSize:11, color:"#9e2742" }}>{err}</div>}
-                    {sent && <div style={{ fontSize:11, color:"#1a6a4a" }}>Thank you. Your feedback was sent to Ascot Rehab's private quality review inbox.</div>}
+                    {sent && <div style={{ fontSize:11, color:"#1a6a4a" }}>Thank you. Your feedback was sent to Ascot Rehab&#39;s private quality review inbox.</div>}
                     <button type="submit" disabled={submitting} style={{ border:"none", background:"var(--plum)", color:"#fff", borderRadius:10, padding:"10px 12px", fontWeight:600, cursor:"pointer", opacity:submitting ? 0.8 : 1 }}>
                       {submitting ? "Submitting..." : "Submit private feedback"}
                     </button>
@@ -508,10 +468,10 @@ export default function App() {
                     <div style={{ fontSize:21, color:"var(--pd)", fontWeight:700, letterSpacing:-0.5, marginBottom:8 }}>Scan to leave feedback</div>
                     <img alt="QR code for Ascot private feedback form" src={qrImage} width="170" height="170" style={{ borderRadius:8, border:"1px solid var(--bd)", padding:6, background:"#fff" }} />
                     <div style={{ fontSize:11, color:"var(--tm)", marginTop:8 }}>{feedbackConfig.shortUrl}</div>
-                    <div style={{ fontSize:10, color:"var(--wl)", marginTop:4 }}>Uses Ascot's secure website contact form.</div>
+                    <div style={{ fontSize:10, color:"var(--wl)", marginTop:4 }}>Uses Ascot&#39;s secure website contact form.</div>
                   </div>
                   <div style={{ background:"var(--pp)", borderRadius:16, padding:"16px 18px", color:"#fff" }}>
-                    <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:1.4, color:"rgba(255,255,255,0.65)" }}>Contact & pathways</div>
+                    <div style={{ fontSize:11, textTransform:"uppercase", letterSpacing:1.4, color:"rgba(255,255,255,0.65)" }}>Contact &amp; pathways</div>
                     <div style={{ marginTop:8, fontSize:13, color:"rgba(255,255,255,0.85)" }}>{companyInfo.pathways}</div>
                     <div style={{ marginTop:8, fontSize:12 }}>{companyInfo.phone}</div>
                     <div style={{ fontSize:12, color:"rgba(255,255,255,0.8)" }}>{companyInfo.email}</div>
@@ -523,7 +483,6 @@ export default function App() {
           )}
         </main>
 
-        {/* ── BOTTOM NAV ── */}
         <nav style={{ position:"relative", zIndex:10, display:"flex", justifyContent:"center", padding:"11px 36px 14px", background:"rgba(255,255,255,0.92)", backdropFilter:"blur(16px)", borderTop:"1.5px solid var(--bd)", gap:7, flexShrink:0 }}>
           {nav.map(n => (
             <button key={n.id} className={`nav-btn ${sec===n.id?"on":""}`} onClick={() => go(n.id)}
